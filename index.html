@@ -121,6 +121,10 @@
         alert("กรุณากรอกชื่อและคะแนนให้ครบ");
         return;
       }
+        if (score < 0 || score > 100) {
+        alert("คะแนนต้องอยู่ระหว่าง 0 - 100 เท่านั้น");
+        return;
+      }
 
       students.push({ name, score });
       saveToLocalStorage();
