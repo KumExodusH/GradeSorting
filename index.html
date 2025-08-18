@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบเก็บคะแนนและแสดงอันดับ</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+    .import-section {
+      margin-top: 15px;
+      padding: 10px;
+      border: 1px dashed #007bff;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ระบบเก็บคะแนนและแสดงอันดับ</h1>
+
+    <div>
+      <input type="text" id="name" placeholder="ชื่อนักเรียน">
+      <input type="number" id="score" placeholder="คะแนน" min="0" max="100">
+      <button onclick="addStudent()">เพิ่มข้อมูล</button>
+      <button onclick="clearAll()">ลบข้อมูลทั้งหมด</button>
+    </div>
+
+    <div class="import-section">
+      <p><b>📥 Import / Export ข้อมูล</b></p>
+      <input type="file" id="csvFile" accept=".csv">
+      <button onclick="importCSV()">Import</button>
+      <button onclick="exportCSV()">Export</button>
+    </div>
+
+    <table id="scoreTable">
+      <thead>
+        <tr>
+          <th>อันดับ</th>
+          <th>ชื่อ</th>
+          <th>คะแนน</th>
+          <th>ลบ</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h2>การกระจายเกรด (Histogram)</h2>
+    <canvas id="gradeChart" height="100"></canvas>
+  </div>
+
+  <script>
+    let students = [];
+
+    // โหลดข้อมูลจาก LocalStorage
+    window.onload = function() {
+      const storedData = localStorage.getItem("students");
+      if (storedData) {
+        students = JSON.parse(storedData);
+      }
+      updateTable();
+      updateChart();
+    };
+
+    function saveToLocalStorage() {
+      localStorage.setItem("students", JSON.stringify(students));
+    }
+
+    function addStudent() {
+      const name = document.getElementById("name").value.trim();
+      const score = parseInt(document.getElementById("score").value);
+
+      if (!name || isNaN(score)) {
+        alert("กรุณากรอกชื่อและคะแนนให้ครบ");
+        return;
+      }
+
+      students.push({ name, score });
+      saveToLocalStorage();
+
+      document.getElementById("name").value = "";
+      document.getElementById("score").value = "";
+
+      updateTable();
+      updateChart();
+    }
+
+    function deleteStudent(index) {
+      students.splice(index, 1);
+      saveToLocalStorage();
+      updateTable();
+      updateChart();
+    }
+
+    function clearAll() {
+      if (confirm("คุณต้องการลบข้อมูลทั้งหมดหรือไม่?")) {
+        students = [];
+        saveToLocalStorage();
+        updateTable();
+        updateChart();
+      }
+    }
+
+    function updateTable() {
+      students.sort((a, b) => b.score - a.score);
+
+      const tbody = document.querySelector("#scoreTable tbody");
+      tbody.innerHTML = "";
+
+      students.forEach((student, index) => {
+        const row = `<tr>
+          <td>${index + 1}</td>
+          <td>${student.name}</td>
+          <td>${student.score}</td>
+          <td><button onclick="deleteStudent(${index})">ลบ</button></td>
+        </tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function getGrade(score) {
+      if (score >= 80) return "A";
+      if (score >= 70) return "B";
+      if (score >= 60) return "C";
+      if (score >= 50) return "D";
+      return "F";
+    }
+
+    let chartInstance = null;
+
+    function updateChart() {
+      const gradeCount = { A:0, B:0, C:0, D:0, F:0 };
+
+      students.forEach(s => {
+        gradeCount[getGrade(s.score)]++;
+      });
+
+      const ctx = document.getElementById("gradeChart").getContext("2d");
+
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["A", "B", "C", "D", "F"],
+          datasets: [{
+            label: "จำนวนนักเรียน",
+            data: Object.values(gradeCount),
+            backgroundColor: ["#28a745","#17a2b8","#ffc107","#fd7e14","#dc3545"]
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              stepSize: 1
+            }
+          }
+        }
+      });
+    }
+
+    // ----------------- Import CSV -----------------
+    function importCSV() {
+      const fileInput = document.getElementById("csvFile");
+      if (!fileInput.files.length) {
+        alert("กรุณาเลือกไฟล์ CSV ก่อน");
+        return;
+      }
+
+      const file = fileInput.files[0];
+
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          results.data.forEach(row => {
+            if (row.name && row.score && !isNaN(row.score)) {
+              students.push({ name: row.name.trim(), score: parseInt(row.score) });
+            }
+          });
+          saveToLocalStorage();
+          updateTable();
+          updateChart();
+          alert("นำเข้าข้อมูลสำเร็จ ✅");
+        }
+      });
+    }
+
+    // ----------------- Export CSV -----------------
+    function exportCSV() {
+      if (students.length === 0) {
+        alert("ไม่มีข้อมูลให้นำออก");
+        return;
+      }
+
+      const csv = Papa.unparse(students);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "students_scores.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
