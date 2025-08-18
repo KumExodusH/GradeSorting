@@ -1,0 +1,227 @@
+body {
+    font-family: 'Prompt', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f0f2f5;
+    overflow: hidden;
+}
+
+#sections {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+}
+
+section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+section.active {
+    opacity: 1;
+    transform: translateY(0);
+    z-index: 1;
+}
+
+.container {
+    max-width: 900px;
+    width: 100%;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+}
+
+h1,
+h2 {
+    color: #1a73e8;
+    margin-bottom: 20px;
+}
+
+input,
+button,
+select {
+    padding: 10px;
+    margin: 8px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 16px;
+}
+
+button {
+    cursor: pointer;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #1557b0;
+}
+
+.table-container {
+    max-height: 40vh;
+    overflow-y: auto;
+    margin-top: 20px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f9fafb;
+}
+
+th,
+td {
+    border: 1px solid #e5e7eb;
+    padding: 12px;
+    text-align: center;
+    word-wrap: break-word;
+}
+
+th {
+    background: #1a73e8;
+    color: white;
+    position: sticky;
+    top: 0;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+    width: 10%;
+}
+
+/* อันดับ */
+th:nth-child(2),
+td:nth-child(2) {
+    width: 50%;
+}
+
+/* ชื่อ */
+th:nth-child(3),
+td:nth-child(3) {
+    width: 15%;
+}
+
+/* คะแนน */
+th:nth-child(4),
+td:nth-child(4) {
+    width: 15%;
+}
+
+/* เกรด */
+th:nth-child(5),
+td:nth-child(5) {
+    width: 25%;
+}
+
+/* แก้ไข/ลบ */
+.import-section {
+    margin-top: 20px;
+    padding: 15px;
+    border: 2px dashed #1a73e8;
+    border-radius: 10px;
+    background: #f0f9ff;
+}
+
+.chart-container {
+    max-height: 50vh;
+    margin-top: 20px;
+    padding: 10px;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+
+.about-section {
+    font-size: 1.2em;
+    line-height: 1.6;
+    color: #374151;
+}
+
+.about-section p {
+    margin: 15px 0;
+}
+
+.about-section img {
+    border-radius: 50%;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.nav-dots {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+.nav-dot {
+    width: 12px;
+    height: 12px;
+    background: #d1d5db;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.nav-dot.active {
+    background: #1a73e8;
+}
+
+#toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1a73e8;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+#toast button {
+    background: white;
+    color: #1a73e8;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#toast button:hover {
+    background: #e5e7eb;
+}
