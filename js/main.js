@@ -12,7 +12,9 @@ window.onload = function () {
     updateChart();
     document.getElementById("chartType").addEventListener("change", updateChart);
     document.getElementById("section1").classList.add("active");
-    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("wheel", handleWheel, {
+        passive: false
+    });
 };
 
 function saveToLocalStorage() {
@@ -32,7 +34,10 @@ function addStudent() {
         return;
     }
 
-    students.push({ name, score });
+    students.push({
+        name,
+        score
+    });
     saveToLocalStorage();
     document.getElementById("name").value = "";
     document.getElementById("score").value = "";
@@ -63,15 +68,15 @@ function updateTable() {
     students.forEach((student, index) => {
         const grade = getGrade(student.score);
         const row = `<tr>
-          <td>${index + 1}</td>
-          <td contenteditable="true" onblur="editStudent(${index}, 'name', this.innerText)">${student.name}</td>
-          <td contenteditable="true" onblur="editStudent(${index}, 'score', this.innerText)">${student.score}</td>
-          <td>${grade}</td>
-          <td>
-            <button onclick="editStudentPrompt(${index})">แก้ไข</button>
-            <button onclick="deleteStudentWithConfirm(${index})">ลบ</button>
-          </td>
-        </tr>`;
+            <td>${index + 1}</td>
+            <td contenteditable="true" onblur="editStudent(${index}, 'name', this.innerText)">${student.name}</td>
+            <td contenteditable="true" onblur="editStudent(${index}, 'score', this.innerText)">${student.score}</td>
+            <td>${grade}</td>
+            <td>
+              <button onclick="editStudentPrompt(${index})">แก้ไข</button>
+              <button onclick="deleteStudentWithConfirm(${index})">ลบ</button>
+            </td>
+          </tr>`;
         tbody.innerHTML += row;
     });
 }
@@ -79,10 +84,10 @@ function updateTable() {
 function deleteStudentWithConfirm(index) {
     const toast = document.getElementById("toast");
     toast.innerHTML = `
-        ต้องการลบ <b>${students[index].name}</b> หรือไม่?
-        <button onclick="confirmDelete(${index})">ใช่</button>
-        <button onclick="hideToast()">ยกเลิก</button>
-      `;
+            ต้องการลบ <b>${students[index].name}</b> หรือไม่?
+            <button onclick="confirmDelete(${index})">ใช่</button>
+            <button onclick="hideToast()">ยกเลิก</button>
+          `;
     toast.classList.add("show");
 }
 
@@ -146,7 +151,7 @@ function updateChart() {
         chartInstance.destroy();
     }
 
-    let labels, data, chartTitle;
+    let labels, data, chartTitle, chartActualType;
 
     if (chartType === 'score_range') {
         const highScoreCount = students.filter(s => s.score >= 50 && s.score <= 100).length;
@@ -155,6 +160,14 @@ function updateChart() {
         labels = ["คะแนน 50 - 100", "คะแนน 0 - 49"];
         data = [highScoreCount, lowScoreCount];
         chartTitle = "การกระจายคะแนนตามช่วง";
+        chartActualType = 'bar';
+    } else if (chartType === 'grade_f') {
+        const fCount = students.filter(s => getGrade(s.score) === 'F').length;
+
+        labels = ["นักเรียนที่ได้เกรด F"];
+        data = [fCount];
+        chartTitle = "จำนวนนักเรียนที่ได้เกรด F";
+        chartActualType = 'bar';
     } else {
         const gradeCount = {
             A: 0,
@@ -170,27 +183,37 @@ function updateChart() {
         labels = ["A", "B", "C", "D", "F"];
         data = Object.values(gradeCount);
         chartTitle = "การกระจายเกรด";
+        chartActualType = chartType;
+    }
+
+    let yMax = 100;
+    if (chartActualType === 'bar' || chartActualType === 'line') {
+        const maxCount = Math.max(...data);
+        if (maxCount > 100) {
+            yMax = maxCount;
+        }
     }
 
     chartInstance = new Chart(ctx, {
-        type: chartType === 'score_range' ? 'bar' : chartType,
+        type: chartActualType,
         data: {
             labels: labels,
             datasets: [{
                 label: chartTitle,
                 data: data,
-                backgroundColor: chartType === "pie" ? ["#34d399", "#60a5fa", "#facc15", "#fb923c", "#ef4444"] : "#1a73e8",
-                borderColor: chartType !== "pie" ? "#1a73e8" : undefined,
-                fill: chartType === "line" ? false : undefined,
-                tension: chartType === "line" ? 0.4 : undefined
+                backgroundColor: chartActualType === "pie" ? ["#34d399", "#60a5fa", "#facc15", "#fb923c", "#ef4444"] : "#1a73e8",
+                borderColor: chartActualType !== "pie" ? "#1a73e8" : undefined,
+                fill: chartActualType === "line" ? false : undefined,
+                tension: chartActualType === "line" ? 0.4 : undefined
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: chartType !== "pie" && chartType !== 'score_range' ? {
+            scales: chartActualType !== "pie" ? {
                 y: {
                     beginAtZero: true,
+                    max: yMax,
                     ticks: {
                         stepSize: 1
                     }
@@ -198,7 +221,7 @@ function updateChart() {
             } : undefined,
             plugins: {
                 legend: {
-                    display: chartType === "pie"
+                    display: chartActualType === "pie"
                 },
                 title: {
                     display: true,
@@ -223,7 +246,10 @@ function importCSV() {
         complete: function (results) {
             results.data.forEach(row => {
                 if (row.name && row.score && !isNaN(row.score)) {
-                    students.push({ name: row.name.trim(), score: parseInt(row.score) });
+                    students.push({
+                        name: row.name.trim(),
+                        score: parseInt(row.score)
+                    });
                 }
             });
             saveToLocalStorage();
@@ -240,7 +266,9 @@ function exportCSV() {
         return;
     }
     const csv = Papa.unparse(students);
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["\uFEFF" + csv], {
+        type: "text/csv;charset=utf-8;"
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);

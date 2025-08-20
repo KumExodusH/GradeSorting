@@ -136,7 +136,8 @@ td:nth-child(5) {
 }
 
 .chart-container {
-    max-height: 50vh;
+    height: 60vh; 
+    max-height: 70vh; 
     margin-top: 20px;
     padding: 10px;
     background: #f9fafb;
