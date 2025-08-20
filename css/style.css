@@ -89,7 +89,7 @@ table {
 th,
 td {
     border: 1px solid #e5e7eb;
-    padding: 12px;
+    padding: 8px;
     text-align: center;
     word-wrap: break-word;
 }
@@ -109,7 +109,7 @@ td:nth-child(1) {
 /* อันดับ */
 th:nth-child(2),
 td:nth-child(2) {
-    width: 50%;
+    width: 40%;
 }
 
 /* ชื่อ */
