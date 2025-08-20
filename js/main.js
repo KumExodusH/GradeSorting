@@ -240,6 +240,13 @@ function importCSV() {
     }
 
     const file = fileInput.files[0];
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+        alert("สกุลไฟล์ไม่ถูกต้อง กรุณาเลือกไฟล์ .csv เท่านั้น");
+        fileInput.value = "";
+        return;
+    }
+    
     Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
