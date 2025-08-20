@@ -139,11 +139,6 @@ function getGrade(score) {
 }
 
 function updateChart() {
-    const gradeCount = { A: 0, B: 0, C: 0, D: 0, F: 0 };
-    students.forEach(s => {
-        gradeCount[getGrade(s.score)]++;
-    });
-
     const ctx = document.getElementById("gradeChart").getContext("2d");
     const chartType = document.getElementById("chartType").value;
 
@@ -151,13 +146,39 @@ function updateChart() {
         chartInstance.destroy();
     }
 
+    let labels, data, chartTitle;
+
+    if (chartType === 'score_range') {
+        const highScoreCount = students.filter(s => s.score >= 50 && s.score <= 100).length;
+        const lowScoreCount = students.filter(s => s.score >= 0 && s.score < 50).length;
+
+        labels = ["คะแนน 50 - 100", "คะแนน 0 - 49"];
+        data = [highScoreCount, lowScoreCount];
+        chartTitle = "การกระจายคะแนนตามช่วง";
+    } else {
+        const gradeCount = {
+            A: 0,
+            B: 0,
+            C: 0,
+            D: 0,
+            F: 0
+        };
+        students.forEach(s => {
+            gradeCount[getGrade(s.score)]++;
+        });
+
+        labels = ["A", "B", "C", "D", "F"];
+        data = Object.values(gradeCount);
+        chartTitle = "การกระจายเกรด";
+    }
+
     chartInstance = new Chart(ctx, {
-        type: chartType,
+        type: chartType === 'score_range' ? 'bar' : chartType,
         data: {
-            labels: ["A", "B", "C", "D", "F"],
+            labels: labels,
             datasets: [{
-                label: "จำนวนนักเรียน",
-                data: Object.values(gradeCount),
+                label: chartTitle,
+                data: data,
                 backgroundColor: chartType === "pie" ? ["#34d399", "#60a5fa", "#facc15", "#fb923c", "#ef4444"] : "#1a73e8",
                 borderColor: chartType !== "pie" ? "#1a73e8" : undefined,
                 fill: chartType === "line" ? false : undefined,
@@ -167,14 +188,22 @@ function updateChart() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: chartType !== "pie" ? {
+            scales: chartType !== "pie" && chartType !== 'score_range' ? {
                 y: {
                     beginAtZero: true,
-                    ticks: { stepSize: 1 }
+                    ticks: {
+                        stepSize: 1
+                    }
                 }
             } : undefined,
             plugins: {
-                legend: { display: chartType === "pie" }
+                legend: {
+                    display: chartType === "pie"
+                },
+                title: {
+                    display: true,
+                    text: chartTitle
+                }
             }
         }
     });
