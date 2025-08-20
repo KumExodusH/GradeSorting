@@ -84,12 +84,13 @@ table {
     width: 100%;
     border-collapse: collapse;
     background: #f9fafb;
+    font-size: 14px;
 }
 
 th,
 td {
     border: 1px solid #e5e7eb;
-    padding: 8px;
+    padding: 6px;
     text-align: center;
     word-wrap: break-word;
 }
@@ -106,31 +107,26 @@ td:nth-child(1) {
     width: 10%;
 }
 
-/* อันดับ */
 th:nth-child(2),
 td:nth-child(2) {
     width: 40%;
 }
 
-/* ชื่อ */
 th:nth-child(3),
 td:nth-child(3) {
     width: 15%;
 }
 
-/* คะแนน */
 th:nth-child(4),
 td:nth-child(4) {
     width: 15%;
 }
 
-/* เกรด */
 th:nth-child(5),
 td:nth-child(5) {
     width: 25%;
 }
 
-/* แก้ไข/ลบ */
 .import-section {
     margin-top: 20px;
     padding: 15px;
